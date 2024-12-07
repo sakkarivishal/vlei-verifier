@@ -39,7 +39,7 @@ def test_service_ecr(seeder):
         #chained ecr auth cred
         ecredge = get_ecr_edge(easaid,Schema.ECR_AUTH_SCHEMA2)
         
-        ecr = get_ecr_cred(issuer=hab.pre, recipient=hab.pre, schema=Schema.ECR_SCHEMA, registry=registry, sedge=ecredge, lei=LEI1)
+        ecr = get_ecr_cred(issuer=hab.pre, recipient=hab.pre, schema=Schema.ECR_SCHEMA, registry=registry, sedge=ecredge, lei=LEI1,role = "EBA Data Admin")
         hab, eccrdntler, ecsaid, eckmsgs, ectmsgs, ecimsgs, ecmsgs = get_cred(hby, hab, regery, registry, verifier, Schema.ECR_SCHEMA, ecr, seqner)
         
         app = falcon.App(
@@ -54,7 +54,7 @@ def test_service_ecr(seeder):
         class testCf:
             @staticmethod
             def get():
-                return dict(LEIs=[f"{LEI1}",f"{LEI2}"])
+                return dict(LEIs=[f"{LEI1}",f"{LEI2}"],ECR_roles=["EBA Data Submitter", "EBA Data Admin","Role1"])
         authDoers = authorizing.setup(hby, vdb=vdb, reger=eccrdntler.rgy.reger, cf=testCf)
 
         doers = authDoers + [httpServerDoer]

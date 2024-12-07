@@ -77,7 +77,11 @@ def setup(hby, vdb, reger, cf):
             "invalid configuration, invalid LEIs in configuration"
         )
 
-    authorizer = Authorizer(hby, vdb, reger, leis)
+    ecr_roles = data.get("ECR_roles", ["EBA Data Submitter"])       #change
+    
+    authorizer = Authorizer(hby, vdb, reger, leis,ecr_roles=ecr_roles)
+    print(f"ECR_role json {ecr_roles} ")
+    
 
     # These lines representing AID keystate and credential revocation state monitoring.
     # witq = agenting.WitnessInquisitor(hby=hby)
@@ -96,7 +100,7 @@ class Authorizer:
 
     TimeoutAuth = 600
 
-    def __init__(self, hby, vdb, reger, leis):
+    def __init__(self, hby, vdb, reger, leis,ecr_roles=None):
         """
         Create a Authenticator capable of persistent processing of messages and performing
         web hook calls.
@@ -112,7 +116,8 @@ class Authorizer:
         self.vdb = vdb
         self.reger = reger
         self.leis = leis
-
+        self.ecr_roles = ecr_roles if ecr_roles else [EBA_DOCUMENT_SUBMITTER_ROLE] #change 1
+        print(f"ecr roles auhtorizng file {self.ecr_roles}")
         self.clients = dict()
 
     def processPresentations(self):
@@ -180,21 +185,21 @@ class Authorizer:
                     res = False, f"Can't authorize cred with {Schema.schema_names[creder.schema]} schema"
                 else:
                     res = False, f"Can't authorize cred with unknown schema {creder.schema}"                        
-
+        print(f"creder.attribute {creder.attrib['engagementContextRole']}")
         if res[0]:
             if creder.issuer not in self.hby.kevers:
                 res = False, f"unknown issuer {creder.issuer}"        
             elif creder.attrib["i"] == None or creder.attrib["i"] not in self.hby.kevers:
-                print(f"unknown issuee {creder.attrib["i"]}")
+                print(f"unknown issuee {creder.attrib['i']}")
             elif len(self.leis) > 0 and creder.attrib["LEI"] not in self.leis:
                 # only process LEI filter if LEI list has been configured
-                res = False, f"LEI: {creder.attrib["LEI"]} not allowed"
-            elif creder.attrib["engagementContextRole"] not in (EBA_DOCUMENT_SUBMITTER_ROLE,):
-                res = False, f"{creder.attrib["engagementContextRole"]} is not a valid submitter role"
+                res = False, f"LEI: {creder.attrib['LEI']} not allowed"
+            elif creder.attrib['engagementContextRole'] not in self.ecr_roles:   #change 2
+                res = False, f"{creder.attrib['engagementContextRole']} is not a valid submitter role"
             elif not (chain := self.chain_filters(creder))[0]:
                 res = chain
             else:
-                res = True, f"Credential passed filters for user {creder.attrib["i"]} with LEI {creder.attrib["LEI"]}"
+                res = True, f"Credential passed filters for user {creder.attrib['i']} with LEI {creder.attrib['LEI']}"
         print(f"Cred filter status {res[0]}, {res[1]}")
         return res
 
@@ -277,7 +282,7 @@ class Authorizer:
                 chain_msg = chain[1] + f"->{cred_type}"
         else:
             chain_success = False
-            chain_msg = f"{cred_type} should chain to schema {dict.keys()}, not {edge["s"]}"
+            chain_msg = f"{cred_type} should chain to schema {dict.keys()}, not {edge['s']}"
         
         if not chain_success:
             chain_msg = f"{cred_type} chain validation failed, " + chain_msg

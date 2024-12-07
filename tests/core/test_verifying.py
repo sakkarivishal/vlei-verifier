@@ -172,6 +172,7 @@ def test_ecr(seeder):
             registry=registry,
             sedge=ecredge,
             lei=LEI1,
+            role = "EBA Data Submitter",
         )
         hab, eccrdntler, ecsaid, eckmsgs, ectmsgs, ecimsgs, ecmsgs = get_cred(
             hby, hab, regery, registry, verifier, Schema.ECR_SCHEMA, ecr, seqner

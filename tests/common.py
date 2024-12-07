@@ -316,17 +316,17 @@ def get_ecr_edge(auth_dig, auth_schema):
   
     return ecr
 
-def get_ecr_data(lei: str):
+def get_ecr_data(lei: str, roles="EBA Data Submitter"):
     return dict(
         d="",
         personLegalName="Bank User",
-        engagementContextRole="EBA Data Submitter",
+        engagementContextRole=roles,
         LEI=f"{lei}"
     )
 
-def get_ecr_cred(issuer, recipient, schema, registry, sedge, lei: str):
+def get_ecr_cred(issuer, recipient, schema, registry, sedge, lei: str,role):
 
-    sad = get_ecr_data(lei)
+    sad = get_ecr_data(lei,role)
 
     _, ecr = coring.Saider.saidify(sad=sad, label=coring.Saids.d)
     

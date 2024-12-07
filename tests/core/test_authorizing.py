@@ -1,5 +1,6 @@
 from ..common import *
 
+
 import falcon
 import falcon.testing
 
@@ -68,7 +69,10 @@ def test_ecr(seeder):
         issAndCred.extend(eamsgs)
         acdc = issAndCred.decode("utf-8")
         hby.kevers[hab.pre] = hab.kever
-        auth = Authorizer(hby, vdb, eacrdntler.rgy.reger, [LEI1])
+
+        new_role=["EBA Data Admin","EBA Data Submitter","Role3"]
+        auth = Authorizer(hby, vdb, eacrdntler.rgy.reger, [LEI1],ecr_roles=new_role) # change 3
+        print(f"new role test file {new_role}")
         chain_success, chain_msg = auth.chain_filters(ecr_auth_cred)
         assert chain_success
         assert chain_msg == f"QVI->LE->ECR_AUTH"
@@ -86,6 +90,7 @@ def test_ecr(seeder):
             registry=registry,
             sedge=ecredge,
             lei=LEI1,
+            role = "EBA Data Admin"
         )
         hab, eccrdntler, ecsaid, eckmsgs, ectmsgs, ecimsgs, ecmsgs = get_cred(
             hby, hab, regery, registry, verifier, Schema.ECR_SCHEMA, ecr_cred, seqner
@@ -94,7 +99,7 @@ def test_ecr(seeder):
         issAndCred = bytearray()
         issAndCred.extend(ecmsgs)
         hby.kevers[hab.pre] = hab.kever
-        auth = Authorizer(hby, vdb, eccrdntler.rgy.reger, [LEI1])
+        auth = Authorizer(hby, vdb, eccrdntler.rgy.reger, [LEI1],new_role)
         chain_success, chain_msg = auth.chain_filters(ecr_cred)
         assert chain_success
         assert chain_msg == f"QVI->LE->ECR_AUTH->ECR"
